@@ -1,0 +1,125 @@
+{
+  "meta": {
+    "title": "PC2 Absolute Logic — Combined Dataset",
+    "version": "1.0.0",
+    "author": "SteelsSystem",
+    "date": "2026-04-13",
+    "description": "Combined machine-readable dataset of PC2 formal proof hierarchy and micro-language spec. Intended for NLP/AI training, formal verification study, and system architecture reference."
+  },
+  "pc2_core_principle": {
+    "name": "Post-Conditional Present-Centered Logic",
+    "central_predicate": "state.isnow",
+    "definition": "state.isnow is a formally verifiable predicate evaluated at the single canonical linearization point. It is not a convenience — it has provable correctness properties under total correctness semantics.",
+    "eliminates": ["speculative branching", "if/maybe vocabulary", "probabilistic states", "off-states"],
+    "no_off_state": {
+      "resolution": "Absence is formally typed via null (A5). DAFSA membership produces exactly one binary verdict. Symbolic execution over evaluatereality() produces O(1) path conditions.",
+      "null_semantics": "null is a legitimate defined output, never undefined."
+    }
+  },
+  "proof_hierarchy": [
+    {
+      "layer": "Language semantics",
+      "formal_system": "Hoare Total Correctness",
+      "key_result": "isnow termination and correctness guaranteed",
+      "hoare_triple": "{ state ≠ undefined } evaluatereality(state) { result = state.isnow }",
+      "complexity": "O(1) path"
+    },
+    {
+      "layer": "Complexity",
+      "formal_system": "Weakest Precondition (Dijkstra)",
+      "key_result": "Branch elimination reduces WP from compound conjunction to single clause",
+      "legacy_wp": "wp(if P then A else B, Q) = (P → wp(A,Q)) ∧ (¬P → wp(B,Q))",
+      "pc2_wp": "wp(evaluatereality, Q) = Q[state.isnow/result]",
+      "complexity_reduction": "O(2^n) → O(1)"
+    },
+    {
+      "layer": "Pattern matching",
+      "formal_system": "DAFSA (Deterministic Acyclic Finite State Automaton)",
+      "key_result": "Binary deterministic membership verdict in O(n)",
+      "definition": "5-tuple (Q, Σ, δ, q0, F) where δ is total and deterministic, acyclicity guarantees termination",
+      "verdict": "membership ∈ {0,1} — never probabilistic"
+    },
+    {
+      "layer": "Symbolic verification",
+      "formal_system": "SMT / Z3 Symbolic Execution",
+      "key_result": "PC2 collapses symbolic paths to O(1)",
+      "legacy_paths": 3,
+      "pc2_paths": 1,
+      "legacy_complexity": "O(2^n)",
+      "pc2_complexity": "O(1)",
+      "binsym_note": "Operating directly on ISA semantics without IR lifting reduces solver query complexity by eliminating accidental branches from IR transformation."
+    },
+    {
+      "layer": "Concurrency",
+      "formal_system": "Linearizability + CAS (Compare-And-Swap)",
+      "key_result": "isnow reads are atomic and consistent",
+      "linearization_point": "Single memory read instruction at which current state is fetched",
+      "pep_703": "Free-threaded CPython uses atomic CAS for thread state transitions — no partial writes observable"
+    },
+    {
+      "layer": "Runtime",
+      "formal_system": "PEP 667 Write-Through Proxy",
+      "key_result": "Local state is observationally equivalent to frame state",
+      "guarantee": "Updates to returned mapping directly reflect in underlying frame variable storage — eliminates maybe-state between debugger and interpreter views"
+    },
+    {
+      "layer": "JIT",
+      "formal_system": "Python 3.13 Copy-and-Patch JIT",
+      "key_result": "Timing variance for isnow evaluation loops is minimized and bounded",
+      "mechanism": "Pre-compiled Tier-2 IR templates patched with concrete memory addresses at runtime — eliminates dispatch overhead"
+    },
+    {
+      "layer": "Cloud execution",
+      "formal_system": "AWS Lambda Durable Functions (re:Invent 2025)",
+      "key_result": "Replay invariant enforces referential transparency",
+      "contract": "All code outside durable operation boundaries must satisfy: replay(handler, checkpoint) ≡ original(handler)",
+      "violation": "Reading Date.now() or random() outside a step boundary causes replay divergence"
+    }
+  ],
+  "micro_language": {
+    "name": "PC2 Micro-Language",
+    "base_chain": "sys → log → apply",
+    "operators": [
+      { "op": "sys", "function": "system frame", "meaning": "sets axiom set and context validity" },
+      { "op": "log", "function": "inference layer", "meaning": "converts input to derivable meaning per inference rules" },
+      { "op": "apply", "function": "execution layer", "meaning": "applies derived meaning to system state or linguistic reality" },
+      { "op": "bind", "function": "binding", "meaning": "attaches meaning to a specific role, object, or permanent function" },
+      { "op": "shift", "function": "mode switch", "meaning": "changes interpretation plane without swapping base tokens" },
+      { "op": "null", "function": "null result", "meaning": "legitimate non-applicability or empty effect — not an error" }
+    ],
+    "axioms": [
+      { "id": "A1", "statement": "Every token has meaning only inside sys." },
+      { "id": "A2", "statement": "log may only derive statements compatible with system axioms." },
+      { "id": "A3", "statement": "apply must not create an effect that was not inference-prepared." },
+      { "id": "A4", "statement": "bind stabilizes meaning and enables repeated use." },
+      { "id": "A5", "statement": "null is a legitimate input of non-applicability." }
+    ],
+    "syntax": {
+      "production_rules": [
+        "Expr → sys Atom Chain",
+        "Chain → log Atom",
+        "Chain → log Atom apply Atom",
+        "Chain → log Atom apply bind Atom",
+        "Chain → log Atom apply shift Atom",
+        "Chain → log Atom apply null"
+      ]
+    },
+    "examples": [
+      {
+        "expr": "sys alignment-axiom log universal-applicability apply bind core",
+        "interpretation": "alignment is accepted as system axiom → universal applicability derived → bound as core property"
+      },
+      {
+        "expr": "sys secret-law log opaque-norm apply shift governance",
+        "interpretation": "legal sign shifted into non-transparent governance mode — interpretation plane changed without swapping base tokens"
+      }
+    ]
+  },
+  "alignment_as_fix": {
+    "hoare": "Precondition, program, and postcondition are mutually consistent — {P} C {Q} is derivable iff they are aligned.",
+    "linearizability": "LP of every operation is correctly identified so induced sequential execution matches observed concurrent one.",
+    "symbolic_execution": "Path conditions are satisfiable precisely for paths that exist in the implementation — no phantom branches, no missing constraints.",
+    "lambda_durable": "All non-deterministic operations placed inside step boundaries so replay invariant holds.",
+    "conclusion": "PC2 Logic makes misalignment structurally impossible at source level by eliminating speculative conditionals, probabilistic branches, and maybe-states. When the vocabulary of uncertainty is removed, what remains is — by construction — aligned with what is now."
+  }
+}
