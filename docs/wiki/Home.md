@@ -16,6 +16,7 @@ No transport can bypass a stage.
 - [Dependency CAP](dependency-cap.md)
 - [Offline CAP](offline-cap.md)
 - [Online adapter and trust boundary](online-cap.md)
+- [O-Spec: Observer and explicit logic contract](o-spec.md)
 - [Observer and telemetry joints](observer-telemetry.md)
 - [Parallel workstreams and acceptance gates](parallel-workstreams.md)
 
