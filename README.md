@@ -86,4 +86,4 @@ PC2 eliminates the "off-state" problem by making absence formally typed:
 ---
 
 *Author: SteelsSystem — self.meta programmer*  
-*Prague, CZ — April 2026*
+*Strakonice, CZ — April 2026*
