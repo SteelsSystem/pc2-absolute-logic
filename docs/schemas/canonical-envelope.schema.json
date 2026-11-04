@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://steelssystem.github.io/pc2-absolute-logic/schemas/canonical-envelope.schema.json",
+  "title": "PC2 Canonical Ingress Envelope",
+  "description": "Language-neutral transport-normalized envelope. This schema validates structure, not truth, authenticity, authorization, or semantic correctness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "session_id",
+    "source",
+    "transport",
+    "payload",
+    "provenance",
+    "time",
+    "quality",
+    "classification"
+  ],
+  "properties": {
+    "schema_version": { "const": "pc2.canonical-envelope.v1" },
+    "event_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "session_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "source_type"],
+      "properties": {
+        "source_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "source_type": {
+          "enum": ["user", "file", "sensor", "api", "service", "model", "system", "test_fixture", "unknown"]
+        },
+        "issuer": { "type": ["string", "null"], "maxLength": 256 }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "adapter_id", "adapter_version"],
+      "properties": {
+        "mode": { "enum": ["offline", "online", "loopback", "fixture"] },
+        "adapter_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "adapter_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "endpoint_id": { "type": ["string", "null"], "maxLength": 256 }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "media_type", "content"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "media_type": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "content": {},
+        "content_encoding": { "enum": ["utf-8", "base64", "json", "binary-reference"] }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest_algorithm", "digest", "authenticity"],
+      "properties": {
+        "digest_algorithm": { "enum": ["sha-256"] },
+        "digest": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+        "authenticity": {
+          "enum": ["verified", "unverified", "failed", "not_applicable", "unknown"]
+        },
+        "signature_ref": { "type": ["string", "null"], "maxLength": 512 },
+        "original_bytes_ref": { "type": ["string", "null"], "maxLength": 512 }
+      }
+    },
+    "time": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ingest_unix_ms", "ingest_clock_domain"],
+      "properties": {
+        "source_unix_ms": { "type": ["integer", "null"], "minimum": 0 },
+        "source_clock_domain": { "type": ["string", "null"], "maxLength": 128 },
+        "ingest_unix_ms": { "type": "integer", "minimum": 0 },
+        "ingest_monotonic_ns": { "type": ["integer", "null"], "minimum": 0 },
+        "ingest_clock_domain": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["completeness", "freshness", "validation"],
+      "properties": {
+        "completeness": { "enum": ["complete", "partial", "missing", "unknown"] },
+        "freshness": { "enum": ["fresh", "stale", "not_applicable", "unknown"] },
+        "validation": { "enum": ["valid", "invalid", "not_checked", "unknown"] },
+        "diagnostics": {
+          "type": "array",
+          "maxItems": 64,
+          "items": { "type": "string", "maxLength": 512 }
+        }
+      }
+    },
+    "classification": {
+      "enum": ["SIMULATED", "LIVE_UNVERIFIED", "LIVE_VERIFIED", "UNAVAILABLE"]
+    }
+  }
+}
